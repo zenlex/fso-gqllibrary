@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/zenlex/fso-gqllibrary/issues"
   },
-  "homepage": "https://github.com/zenlex/fso-gqllibrary#readme"
+  "homepage": "https://github.com/zenlex/fso-gqllibrary#readme",
+  "devDependencies": {
+    "eslint": "^8.10.0"
+  }
 }
