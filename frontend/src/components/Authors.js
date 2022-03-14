@@ -18,7 +18,6 @@ const Authors = (props) => {
 
   if (data) {
     const authors = data.allAuthors;
-    console.log('authors: ', authors)
     return (
       <div>
         <h2>authors</h2>
