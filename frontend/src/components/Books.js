@@ -12,6 +12,10 @@ const Books = (props) => {
     return <div>loading...</div>
   }
 
+  if(error){
+    return <div>{error.message}</div>
+  }
+
   const books = data.allBooks
 
   return (
