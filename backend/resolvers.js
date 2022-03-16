@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { gql } from 'apollo-server-core';
+import { gql, UserInputError } from 'apollo-server-core';
 import Book from './models/book.js';
 import Author from './models/author.js';
 
@@ -9,6 +9,17 @@ export const typeDefs = gql`
     authorCount: Int!
     allBooks(author: String, genre: String): [Book]!
     allAuthors: [Author]!
+    me: User
+  }
+
+  type Token{
+    value: String!
+  }
+
+  type User{
+    username: String!
+    favoriteGenre: String!
+    id: ID!
   }
 
   type Book {
@@ -34,8 +45,20 @@ export const typeDefs = gql`
       genres: [String]
     ): Book
     editAuthor(name: String!, setBornTo: Int): Author
+    createUser(
+      username: String!
+      favoriteGenre: String!
+    ): User
+    login(
+      username: String!
+      password: String!
+    ): Token
   }
 `;
+
+const countBooks  = (author) => {
+  author.bookCount = Book.collection.count({author: author._id});
+};
 
 export const resolvers = {
   Query: {
@@ -47,40 +70,52 @@ export const resolvers = {
       if(args.author){
         const author= await Author.findOne({name:args.author});
         books = await Book.find({author: author._id}).populate('author');
+        books.forEach(({author}) => countBooks(author));
         if (args.genre) {
           books = books.filter((b) => b.genres.includes(args.genre));
         }
       }else if(args.genre){
         books = await Book.find({genre: {$in: args.genre}});
       }else{
-        books = Book.find({}).populate('author');
+        books = await Book.find({}).populate('author');
+        books.forEach(({author}) => countBooks(author));
+        
       }
       
       return books;
     },
     allAuthors: async (root) => {
       const authors =  await Author.find({});
-      authors.forEach(auth => auth.bookCount = Book.collection.countDocuments({author: auth._id}));
+      authors.forEach(author => countBooks(author));
       return authors;
     },
+    //TODO: ex8.16 - implement resolvers and database storage for users
+    //TODO: test login with query (don't worry about front end)
+    //TODO: implement 'me' query resolver
   },
 
   Mutation: {
     addBook: async (root, args) => {
-      console.log('addBook args: ', args);
       const author = await Author.findOne({name: args.author});
-      console.log('Author search result:', author);
       let newBook;
       if (!author) {
-        const newAuthor = await Author.create({ name: args.author });
-        console.log('new author created: ', newAuthor);
-        newBook = {...args, author:newAuthor._id.toString()};
+        try{
+          const newAuthor = await Author.create({ name: args.author });
+          newBook = {...args, author:newAuthor._id.toString()};
+        }catch(err){
+          throw new UserInputError(err.message);
+        }
       }else{
         newBook = {...args, author:author._id.toString()};
       }
-      const result = await Book.create(newBook);
-      console.log('new book created:', result);
-      return result;
+      try{
+        await Book.create(newBook);
+        const book = await Book.findOne({title: newBook.title}).populate('author');
+        countBooks(book.author);
+        return book;
+      }catch(err){
+        throw new UserInputError(err.message);
+      }
     },
     editAuthor: async (root, args) => {
       const author = await Author.findOne({name: args.name});
@@ -88,7 +123,9 @@ export const resolvers = {
         return null;
       }
       author.born = args.setBornTo;
-      return await author.save();
+      const result = await author.save();
+      countBooks(author);
+      return result;
     },
   },
 };

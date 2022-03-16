@@ -7,8 +7,6 @@ import process from 'process';
 dotenv.config();
 const MONGO_URL = process.env.MONGODB_URI;
 
-console.log('MongoDB URL:', MONGO_URL);
-
 mongoose.connect(MONGO_URL)
   .then(() => 
     console.log('Connected to MongoDB')
