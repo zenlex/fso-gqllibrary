@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { gql } from 'apollo-server-core';
 import {books, authors} from './dummydata.js';
+import Book from './models/book.js';
 
 export const typeDefs = gql`
   type Query {
@@ -12,9 +13,10 @@ export const typeDefs = gql`
 
   type Book {
     title: String!
-    author: String
-    published: Int
-    genres: [String]
+    author: Author!
+    published: Int!
+    genres: [String!]!
+    id: ID!
   }
 
   type Author {
@@ -38,8 +40,9 @@ export const resolvers = {
   Query: {
     bookCount: (root) => books.length,
     authorCount: (root) => authors.length,
-    allBooks: (root, args) => {
+    allBooks: async (root, args) => {
       // filter by author
+      let books = await Book.find({});
       let results = args.author
         ? books.filter((b) => b.author === args.author)
         : books;

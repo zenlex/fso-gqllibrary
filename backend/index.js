@@ -4,9 +4,12 @@ import mongoose from 'mongoose';
 import { ApolloServer, gql } from 'apollo-server';
 import { typeDefs, resolvers } from './resolvers.js';
 import process from 'process';
-
 dotenv.config();
-mongoose.connect(process.env.MONGODB_URI)
+const MONGO_URL = process.env.MONGODB_URI;
+
+console.log('MongoDB URL:', MONGO_URL);
+
+mongoose.connect(MONGO_URL)
   .then(() => 
     console.log('Connected to MongoDB')
   ).catch(err => 
