@@ -10,4 +10,4 @@ const schema = new mongoose.Schema({
   born: Number,
 });
 
-export default mongoose.connect('Authors', schema);
+export default mongoose.model('Authors', schema);

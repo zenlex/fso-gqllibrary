@@ -2,6 +2,7 @@
 import { gql } from 'apollo-server-core';
 import {books, authors} from './dummydata.js';
 import Book from './models/book.js';
+import Author from './models/author.js';
 
 export const typeDefs = gql`
   type Query {
@@ -62,17 +63,21 @@ export const resolvers = {
   },
 
   Mutation: {
-    addBook: (root, args) => {
+    addBook: async (root, args) => {
       console.log('addBook args: ', args);
-      const newBook = { ...args };
-      books.push(newBook);
-      const author = authors.find((a) => a.name === args.author);
+      const author = await Author.findOne({name: args.author});
+      console.log('Author search result:', author);
+      let newBook;
       if (!author) {
-        authors.push({ name: args.author });
-        // console.log('Author Added:', {authors});
+        const newAuthor = await Author.create({ name: args.author });
+        console.log('new author created: ', newAuthor);
+        newBook = {...args, author:newAuthor._id.toString()};
+      }else{
+        newBook = {...args, author:author._id.toString()};
       }
-      console.log(newBook);
-      return newBook;
+      const result = await Book.create(newBook);
+      console.log('new book created:', result);
+      return result;
     },
     editAuthor: (root, args) => {
       const author = authors.find((a) => a.name === args.name);
