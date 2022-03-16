@@ -1,93 +1,23 @@
 /* eslint-disable no-unused-vars */
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 import { ApolloServer, gql } from 'apollo-server';
-import {books, authors} from './dummydata.js';
+import { typeDefs, resolvers } from './resolvers.js';
+import process from 'process';
 
-const typeDefs = gql`
-  type Query {
-    bookCount: Int!
-    authorCount: Int!
-    allBooks(author:String, genre:String): [Book]!
-    allAuthors: [Author]!
-  }
-
-  type Book{
-    title: String!
-    author: String
-    published: Int
-    genres:[String]
-  }
-
-  type Author{
-    name: String!
-    bookCount: Int
-    born: Int
-  }
-
-  type Mutation{
-    addBook(
-      title:String!, 
-      author:String!, 
-      published:Int, 
-      genres:[String]
-      ): Book
-    editAuthor(
-      name:String!, 
-      setBornTo: Int
-      ): Author
-  }
-`;
-
-const resolvers = {
-	Query: {
-		bookCount: (root) => books.length,
-		authorCount: (root) => authors.length,
-		allBooks: (root, args) => {
-			// filter by author
-			let results = args.author ? 
-				books.filter(b => b.author === args.author) 
-				: books;
-			//filter by genre
-			if(args.genre){
-				results = results.filter(b => b.genres.includes(args.genre));
-			}
-
-			return results;
-		},
-		allAuthors: (root) => {
-			return authors.map(author => ({...author, bookCount: books.filter(b => b.author === author.name).length}));
-		}
-	},
-
-	Mutation:{
-		addBook: (root, args) => {
-			console.log('addBook args: ', args);
-			const newBook = {...args};
-			books.push(newBook);
-			const author = authors.find(a => a.name === args.author);
-			if(!author){
-				authors.push({name:args.author});
-				// console.log('Author Added:', {authors});
-			}
-			console.log(newBook);
-			return newBook;
-		},
-		editAuthor: (root, args) => {
-			const author = authors.find(a => a.name === args.name);
-			if(!author){
-				return null;
-			}
-			author.born = args.setBornTo;
-			console.log(authors);
-			return author;
-		}
-	}
-};
-
+dotenv.config();
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => 
+    console.log('Connected to MongoDB')
+  ).catch(err => 
+    console.log('error connecting to MongoDB:', err)
+  );
+  
 const server = new ApolloServer({
-	typeDefs,
-	resolvers
+  typeDefs,
+  resolvers,
 });
 
 server.listen().then(({ url }) => {
-	console.log(`Server ready at ${url}`);
+  console.log(`Server ready at ${url}`);
 });

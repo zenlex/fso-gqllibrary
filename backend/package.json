@@ -10,6 +10,9 @@
   "description": "Full Stack Open Library GraphQL Project",
   "main": "index.js",
   "type": "module",
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js"
@@ -25,6 +28,7 @@
   },
   "homepage": "https://github.com/zenlex/fso-gqllibrary#readme",
   "devDependencies": {
-    "eslint": "^8.10.0"
+    "eslint": "^8.10.0",
+    "eslint-plugin-node": "^11.1.0"
   }
 }
