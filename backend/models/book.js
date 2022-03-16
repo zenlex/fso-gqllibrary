@@ -15,4 +15,4 @@ const schema = new mongoose.Schema({
   genres: [String]
 });
 
-export default mongoose.model('Books', schema);
+export default mongoose.model('Book', schema);

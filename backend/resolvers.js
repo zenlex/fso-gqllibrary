@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars */
 import { gql } from 'apollo-server-core';
-import {books, authors} from './dummydata.js';
 import Book from './models/book.js';
 import Author from './models/author.js';
 
@@ -14,7 +13,7 @@ export const typeDefs = gql`
 
   type Book {
     title: String!
-    author: Author!
+    author: Author
     published: Int!
     genres: [String!]!
     id: ID!
@@ -24,6 +23,7 @@ export const typeDefs = gql`
     name: String!
     bookCount: Int
     born: Int
+    id: ID!
   }
 
   type Mutation {
@@ -39,26 +39,29 @@ export const typeDefs = gql`
 
 export const resolvers = {
   Query: {
-    bookCount: (root) => books.length,
-    authorCount: (root) => authors.length,
+    bookCount: async (root) => Book.collection.countDocuments(),
+    authorCount: (root) => Author.collection.countDocuments(),
     allBooks: async (root, args) => {
       // filter by author
-      let books = await Book.find({});
-      let results = args.author
-        ? books.filter((b) => b.author === args.author)
-        : books;
-      //filter by genre
-      if (args.genre) {
-        results = results.filter((b) => b.genres.includes(args.genre));
+      let books;
+      if(args.author){
+        const author= await Author.findOne({name:args.author});
+        books = await Book.find({author: author._id}).populate('author');
+        if (args.genre) {
+          books = books.filter((b) => b.genres.includes(args.genre));
+        }
+      }else if(args.genre){
+        books = await Book.find({genre: {$in: args.genre}});
+      }else{
+        books = Book.find({}).populate('author');
       }
-
-      return results;
+      
+      return books;
     },
-    allAuthors: (root) => {
-      return authors.map((author) => ({
-        ...author,
-        bookCount: books.filter((b) => b.author === author.name).length,
-      }));
+    allAuthors: async (root) => {
+      const authors =  await Author.find({});
+      authors.forEach(auth => auth.bookCount = Book.collection.countDocuments({author: auth._id}));
+      return authors;
     },
   },
 
@@ -79,14 +82,13 @@ export const resolvers = {
       console.log('new book created:', result);
       return result;
     },
-    editAuthor: (root, args) => {
-      const author = authors.find((a) => a.name === args.name);
+    editAuthor: async (root, args) => {
+      const author = await Author.findOne({name: args.name});
       if (!author) {
         return null;
       }
       author.born = args.setBornTo;
-      console.log(authors);
-      return author;
+      return await author.save();
     },
   },
 };
