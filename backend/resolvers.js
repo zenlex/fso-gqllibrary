@@ -1,7 +1,14 @@
 /* eslint-disable no-unused-vars */
-import { gql, UserInputError } from 'apollo-server-core';
+import { AuthenticationError, gql, UserInputError } from 'apollo-server-core';
 import Book from './models/book.js';
 import Author from './models/author.js';
+import User from './models/user.js';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+import process from 'process';
+dotenv.config();
+
+const {JWT_SECRET} = process.env;
 
 export const typeDefs = gql`
   type Query {
@@ -89,13 +96,19 @@ export const resolvers = {
       authors.forEach(author => countBooks(author));
       return authors;
     },
+    me: async (root, args, {currentUser}) => {
+      return currentUser;
+    }
     //TODO: ex8.16 - implement resolvers and database storage for users
     //TODO: test login with query (don't worry about front end)
     //TODO: implement 'me' query resolver
   },
 
   Mutation: {
-    addBook: async (root, args) => {
+    addBook: async (root, args, {currentUser}) => {
+      if(!currentUser){
+        throw new AuthenticationError('not authenticated');
+      }
       const author = await Author.findOne({name: args.author});
       let newBook;
       if (!author) {
@@ -117,7 +130,10 @@ export const resolvers = {
         throw new UserInputError(err.message);
       }
     },
-    editAuthor: async (root, args) => {
+    editAuthor: async (root, args, {currentUser}) => {
+      if(!currentUser){
+        throw new AuthenticationError('not authenticated');
+      }
       const author = await Author.findOne({name: args.name});
       if (!author) {
         return null;
@@ -127,5 +143,27 @@ export const resolvers = {
       countBooks(author);
       return result;
     },
+    createUser: async(root, args) => {
+      const newUser = await User.create(args)
+        .catch(err => {
+          throw new UserInputError(err.message, {
+            invalidArgs: args
+          });
+        });
+      return newUser;
+    },
+    login: async(root, args) => {
+      const user = await User.findOne({username: args.username});
+      if(!user || args.password !== 'secret'){
+        throw new UserInputError('wrong credentials');
+      }
+
+      const userForToken = {
+        username: user.username,
+        id: user._id
+      };
+
+      return { value: jwt.sign(userForToken, JWT_SECRET)};
+    }
   },
 };

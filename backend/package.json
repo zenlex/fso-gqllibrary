@@ -3,6 +3,7 @@
     "apollo-server": "^3.6.3",
     "apollo-server-core": "^3.6.3",
     "graphql": "^16.3.0",
+    "jsonwebtoken": "^8.5.1",
     "nodemon": "^2.0.15"
   },
   "name": "fso-gqllibrary",
