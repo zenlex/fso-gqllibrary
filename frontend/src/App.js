@@ -2,10 +2,33 @@ import { useState } from 'react'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
+import Notify from './components/Notify'
+import LoginForm from './components/LoginForm'
 
-const App = () => {
+const App = ({client}) => {
   const [page, setPage] = useState('authors')
+  const [token, setToken] = useState(null);
+  const [notification, setNotification] = useState(null);
 
+  const logout = () => {
+    setToken(null)
+    localStorage.clear()
+    client.resetStore()
+  }
+
+  const notify = (msg) => {
+    setNotification(msg);
+    setTimeout(() => setNotification(null), 5000);
+  }
+
+  if (!token) {
+    return (
+      <>
+        <Notify errorMessage={notification} />
+        <LoginForm setToken={setToken} setMsg={notify} />
+      </>
+    )
+  }
   return (
     <div>
       <div>
@@ -19,6 +42,7 @@ const App = () => {
       <Books show={page === 'books'} />
 
       <NewBook show={page === 'add'} />
+      <button onClick={logout}>logout</button>
     </div>
   )
 }
