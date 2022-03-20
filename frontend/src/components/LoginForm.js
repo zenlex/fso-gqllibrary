@@ -8,7 +8,7 @@ const [password, setPassword] = useState('')
 
 const [ login, result ] = useMutation(LOGIN, {
   onError: (error) => {
-    setMsg(error)
+    setMsg(error.message)
   }
 })
 
@@ -22,7 +22,6 @@ useEffect(() => {
 }, [result.data])
 const handleLogin = async (e) => {
   e.preventDefault()
-
   login({ variables: {username, password}})
 }
 
