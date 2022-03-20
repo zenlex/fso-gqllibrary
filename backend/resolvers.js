@@ -32,7 +32,7 @@ export const typeDefs = gql`
   type Book {
     title: String!
     author: Author
-    published: Int!
+    published: Int
     genres: [String!]!
     id: ID!
   }
@@ -99,9 +99,6 @@ export const resolvers = {
     me: async (root, args, {currentUser}) => {
       return currentUser;
     }
-    //TODO: ex8.16 - implement resolvers and database storage for users
-    //TODO: test login with query (don't worry about front end)
-    //TODO: implement 'me' query resolver
   },
 
   Mutation: {
