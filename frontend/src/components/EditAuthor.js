@@ -9,7 +9,6 @@ const EditAuthor = ({ authors }) => {
 
   const submitBirthYear = (e) => {
     e.preventDefault();
-    console.log(`setting year for ${authName} to ${authBirthYear}`);
     editAuthor({
       variables: {
         name: authName === '' ? null : authName,
