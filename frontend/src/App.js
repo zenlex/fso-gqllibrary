@@ -1,55 +1,47 @@
-import { useEffect, useState } from 'react'
-import Authors from './components/Authors'
-import Books from './components/Books'
-import NewBook from './components/NewBook'
-import Notify from './components/Notify'
-import LoginForm from './components/LoginForm'
+import { useEffect, useState } from 'react';
+import Authors from './components/Authors';
+import Books from './components/Books';
+import NewBook from './components/NewBook';
+import Notify from './components/Notify';
+import Nav from './components/Nav';
 
-const App = ({client}) => {
-  const [page, setPage] = useState('authors')
+const App = ({ client }) => {
+  const [page, setPage] = useState('authors');
   const [token, setToken] = useState(null);
   const [notification, setNotification] = useState(null);
   useEffect(() => {
-    const storedToken = localStorage.getItem('library-user-token')
-    if(storedToken){
-      setToken(storedToken)
+    const storedToken = localStorage.getItem('library-user-token');
+    if (storedToken) {
+      setToken(storedToken);
     }
-  }, [])
+  }, []);
+
   const logout = () => {
-    setToken(null)
-    localStorage.clear()
-    client.resetStore()
-  }
+    setToken(null);
+    localStorage.clear();
+    client.resetStore();
+  };
 
   const notify = (msg) => {
     setNotification(msg);
     setTimeout(() => setNotification(null), 5000);
-  }
+  };
 
-  if (!token) {
-    return (
-      <>
-        <Notify errorMessage={notification} />
-        <LoginForm setToken={setToken} setMsg={notify} />
-      </>
-    )
-  }
   return (
     <div>
-      <div>
-        <button onClick={() => setPage('authors')}>authors</button>
-        <button onClick={() => setPage('books')}>books</button>
-        <button onClick={() => setPage('add')}>add book</button>
-      </div>
-
-      <Authors show={page === 'authors'} />
-
+      <Nav
+        token={token}
+        setToken={setToken}
+        setPage={setPage}
+        notify={notify}
+        logout={logout}
+      />
+      <Notify errorMessage={notification} />
+      <Authors show={page === 'authors'} token={token} />
       <Books show={page === 'books'} />
-
       <NewBook show={page === 'add'} />
-      <button onClick={logout}>logout</button>
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;
