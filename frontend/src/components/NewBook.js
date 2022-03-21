@@ -20,13 +20,14 @@ const NewBook = ({ show }) => {
 
   const submit = async (event) => {
     event.preventDefault();
-
+    console.log({ genre });
+    const submittedGenres = genre === '' ? genres : genres.concat(genre);
     createBook({
       variables: {
         title: title === '' ? null : title,
         author: author === '' ? null : author,
         published: parseInt(published),
-        genres,
+        genres: submittedGenres,
       },
       refetchQueries: [{ query: ALL_AUTHORS }, { query: ALL_BOOKS }],
     });
@@ -76,7 +77,7 @@ const NewBook = ({ show }) => {
             add genre
           </button>
         </div>
-        <div>genres: {genres.join(' ')}</div>
+        <div>genres: {genres.join(', ')}</div>
         <button type='submit'>create book</button>
       </form>
     </div>
