@@ -8,7 +8,7 @@ import dotenv from 'dotenv';
 import process from 'process';
 dotenv.config();
 
-const {JWT_SECRET} = process.env;
+const { JWT_SECRET } = process.env;
 
 export const typeDefs = gql`
   type Query {
@@ -19,11 +19,11 @@ export const typeDefs = gql`
     me: User
   }
 
-  type Token{
+  type Token {
     value: String!
   }
 
-  type User{
+  type User {
     username: String!
     favoriteGenre: String!
     id: ID!
@@ -52,19 +52,13 @@ export const typeDefs = gql`
       genres: [String]
     ): Book
     editAuthor(name: String!, setBornTo: Int): Author
-    createUser(
-      username: String!
-      favoriteGenre: String!
-    ): User
-    login(
-      username: String!
-      password: String!
-    ): Token
+    createUser(username: String!, favoriteGenre: String!): User
+    login(username: String!, password: String!): Token
   }
 `;
 
-const countBooks  = (author) => {
-  author.bookCount = Book.collection.count({author: author._id});
+const countBooks = (author) => {
+  author.bookCount = Book.collection.count({ author: author._id });
 };
 
 export const resolvers = {
@@ -74,64 +68,69 @@ export const resolvers = {
     allBooks: async (root, args) => {
       // filter by author
       let books;
-      if(args.author){
-        const author= await Author.findOne({name:args.author});
-        books = await Book.find({author: author._id}).populate('author');
-        books.forEach(({author}) => countBooks(author));
+      if (args.author) {
+        const author = await Author.findOne({ name: args.author });
+        books = await Book.find({ author: author._id }).populate('author');
+        books.forEach(({ author }) => countBooks(author));
         if (args.genre) {
           books = books.filter((b) => b.genres.includes(args.genre));
         }
-      }else if(args.genre){
-        books = await Book.find({genre: {$in: args.genre}});
-      }else{
+        // filter by genre only
+      } else if (args.genre) {
+        books = await Book.find({ genres: { $in: [args.genre] } }).populate(
+          'author'
+        );
+      } else {
         books = await Book.find({}).populate('author');
-        books.forEach(({author}) => countBooks(author));
-        
+        books.forEach(({ author }) => countBooks(author));
       }
-      
+
       return books;
     },
     allAuthors: async (root) => {
-      const authors =  await Author.find({});
-      authors.forEach(author => countBooks(author));
+      const authors = await Author.find({});
+      authors.forEach((author) => countBooks(author));
       return authors;
     },
-    me: async (root, args, {currentUser}) => {
+    me: async (root, args, { currentUser }) => {
+      console.log({ currentUser });
       return currentUser;
-    }
+    },
   },
 
   Mutation: {
-    addBook: async (root, args, {currentUser}) => {
-      if(!currentUser){
+    addBook: async (root, args, { currentUser }) => {
+      if (!currentUser) {
         throw new AuthenticationError('not authenticated');
       }
-      const author = await Author.findOne({name: args.author});
+      const author = await Author.findOne({ name: args.author });
       let newBook;
       if (!author) {
-        try{
+        try {
           const newAuthor = await Author.create({ name: args.author });
-          newBook = {...args, author:newAuthor._id.toString()};
-        }catch(err){
+          newBook = { ...args, author: newAuthor._id.toString() };
+        } catch (err) {
           throw new UserInputError(err.message);
         }
-      }else{
-        newBook = {...args, author:author._id.toString()};
+      } else {
+        newBook = { ...args, author: author._id.toString() };
       }
-      try{
+      try {
         await Book.create(newBook);
-        const book = await Book.findOne({title: newBook.title}).populate('author');
+        const book = await Book.findOne({ title: newBook.title }).populate(
+          'author'
+        );
         countBooks(book.author);
         return book;
-      }catch(err){
+      } catch (err) {
         throw new UserInputError(err.message);
       }
     },
-    editAuthor: async (root, args, {currentUser}) => {
-      if(!currentUser){
+    editAuthor: async (root, args, { currentUser }) => {
+      if (!currentUser) {
         throw new AuthenticationError('not authenticated');
       }
-      const author = await Author.findOne({name: args.name});
+      const author = await Author.findOne({ name: args.name });
       if (!author) {
         return null;
       }
@@ -140,27 +139,26 @@ export const resolvers = {
       countBooks(author);
       return result;
     },
-    createUser: async(root, args) => {
-      const newUser = await User.create(args)
-        .catch(err => {
-          throw new UserInputError(err.message, {
-            invalidArgs: args
-          });
+    createUser: async (root, args) => {
+      const newUser = await User.create(args).catch((err) => {
+        throw new UserInputError(err.message, {
+          invalidArgs: args,
         });
+      });
       return newUser;
     },
-    login: async(root, args) => {
-      const user = await User.findOne({username: args.username});
-      if(!user || args.password !== 'secret'){
+    login: async (root, args) => {
+      const user = await User.findOne({ username: args.username });
+      if (!user || args.password !== 'secret') {
         throw new UserInputError('wrong credentials');
       }
 
       const userForToken = {
         username: user.username,
-        id: user._id
+        id: user._id,
       };
 
-      return { value: jwt.sign(userForToken, JWT_SECRET)};
-    }
+      return { value: jwt.sign(userForToken, JWT_SECRET) };
+    },
   },
 };

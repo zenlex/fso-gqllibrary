@@ -24,7 +24,6 @@ const Books = ({ show }) => {
       genres.forEach((genre) => allGenres.add(genre));
     }
   });
-  console.log({ allGenres });
   const books =
     genre === ''
       ? data.allBooks
