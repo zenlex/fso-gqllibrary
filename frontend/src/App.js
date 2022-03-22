@@ -14,6 +14,7 @@ const App = () => {
   const [favGenre, setFavGenre] = useState('');
   const [notification, setNotification] = useState(null);
 
+  // check on reload for current token
   useEffect(() => {
     const storedToken = localStorage.getItem('library-user-token');
     if (storedToken) {
@@ -21,19 +22,19 @@ const App = () => {
     }
   }, []);
 
-  const client = useApolloClient();
+  //get info for current user
   const { data } = useQuery(ME, {
     variables: { token },
   });
 
   useEffect(() => {
-    console.log('useEffect called', { data });
     if (data?.me) {
-      console.log('Userdata inside LoginForm useEffect() : ', data);
       setFavGenre(data.me.favoriteGenre);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, token]);
+
+  const client = useApolloClient();
 
   const logout = () => {
     client.resetStore();
@@ -56,7 +57,6 @@ const App = () => {
         setPage={setPage}
         notify={notify}
         logout={logout}
-        setFavGenre={setFavGenre}
       />
       <Notify errorMessage={notification} />
       <Authors show={page === 'authors'} token={token} />

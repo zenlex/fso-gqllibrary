@@ -3,7 +3,6 @@ import { useQuery } from '@apollo/client';
 
 // View to display list of books based on logged in users genre
 const Recommended = ({ show, favGenre }) => {
-  console.log(`favGenre passed in to Recommended: ${favGenre}`, { show });
   // fetch books filtered by genre
   const { data, loading, error } = useQuery(ALL_BOOKS, {
     variables: {

@@ -20,7 +20,6 @@ const NewBook = ({ show }) => {
 
   const submit = async (event) => {
     event.preventDefault();
-    console.log({ genre });
     const submittedGenres = genre === '' ? genres : genres.concat(genre);
     createBook({
       variables: {

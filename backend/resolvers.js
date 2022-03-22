@@ -93,7 +93,6 @@ export const resolvers = {
       return authors;
     },
     me: async (root, args, { currentUser }) => {
-      console.log('token:', args.token);
       return currentUser;
     },
   },

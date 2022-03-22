@@ -1,6 +1,6 @@
 import LoginForm from './LoginForm';
 
-const Nav = ({ token, setToken, setPage, notify, logout, setFavGenre }) => {
+const Nav = ({ token, setToken, setPage, notify, logout }) => {
   return (
     <nav>
       <button onClick={() => setPage('authors')}>authors</button>
@@ -14,7 +14,6 @@ const Nav = ({ token, setToken, setPage, notify, logout, setFavGenre }) => {
         setMsg={notify}
         logout={logout}
         token={token}
-        setFavGenre={setFavGenre}
       />
     </nav>
   );
