@@ -6,6 +6,9 @@ import User from './models/user.js';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import process from 'process';
+import { PubSub } from 'graphql-subscriptions';
+const pubsub = new PubSub();
+
 dotenv.config();
 
 const { JWT_SECRET } = process.env;
@@ -72,6 +75,7 @@ const resolvers = {
           'author'
         );
         countBooks(book.author);
+        pubsub.publish('BOOK_ADDED', { bookAdded: book });
         return book;
       } catch (err) {
         throw new UserInputError(err.message);
