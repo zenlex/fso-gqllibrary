@@ -61,7 +61,7 @@ const App = () => {
       <Notify errorMessage={notification} />
       <Authors show={page === 'authors'} token={token} />
       <Books show={page === 'books'} />
-      <NewBook show={page === 'add'} />
+      <NewBook show={page === 'add'} setPage={setPage} />
       <Recommended show={page === 'recommended'} favGenre={favGenre} />
     </div>
   );

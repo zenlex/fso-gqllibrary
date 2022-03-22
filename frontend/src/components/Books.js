@@ -3,8 +3,10 @@ import { useQuery } from '@apollo/client';
 import { useState } from 'react';
 
 const Books = ({ show }) => {
-  const { data, loading, error } = useQuery(ALL_BOOKS);
   const [genre, setGenre] = useState('');
+  const { data, loading, error } = useQuery(ALL_BOOKS, {
+    variables: { genre },
+  });
 
   if (!show) {
     return null;
@@ -24,10 +26,8 @@ const Books = ({ show }) => {
       genres.forEach((genre) => allGenres.add(genre));
     }
   });
-  const books =
-    genre === ''
-      ? data.allBooks
-      : data.allBooks.filter((book) => book.genres.includes(genre));
+
+  const books = data.allBooks;
 
   return (
     <div>
