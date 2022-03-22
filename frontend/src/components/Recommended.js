@@ -1,19 +1,26 @@
 import { ALL_BOOKS } from '../queries';
 import { useQuery } from '@apollo/client';
 
+// View to display list of books based on logged in users genre
 const Recommended = ({ show, favGenre }) => {
-  console.log({ favGenre });
-  const { data, loading } = useQuery(ALL_BOOKS, {
+  console.log(`favGenre passed in to Recommended: ${favGenre}`, { show });
+  // fetch books filtered by genre
+  const { data, loading, error } = useQuery(ALL_BOOKS, {
     variables: {
       genre: favGenre,
     },
   });
 
+  // not active view
   if (!show) return null;
 
+  // graphQl query pending
   if (loading) return <div>loading...</div>;
 
-  if (!data) return <div>no data found...</div>;
+  // error handling
+  if (error) return <div>{error.message}</div>;
+
+  //fetch successful
   return (
     <div>
       <table>

@@ -1,21 +1,20 @@
 import { useEffect, useState } from 'react';
-import { useMutation, useQuery } from '@apollo/client';
-import { LOGIN, ME } from '../queries';
+import { useMutation } from '@apollo/client';
+import { LOGIN } from '../queries';
 
 const LoginForm = ({ setToken, setMsg, logout, token, setFavGenre }) => {
+  // form controls
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [visible, setVisible] = useState(false);
 
+  // hook - get dispatcher for login mutation
   const [login, result] = useMutation(LOGIN, {
     onError: (error) => {
       setMsg(error.message);
     },
-    refetchQueries: [{ query: ME }],
   });
 
-  const { data: userData } = useQuery(ME);
-  console.log(userData);
   useEffect(() => {
     if (result.data) {
       const token = result.data.login.value;
@@ -26,18 +25,11 @@ const LoginForm = ({ setToken, setMsg, logout, token, setFavGenre }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result.data]);
 
-  useEffect(() => {
-    if (userData && userData.me !== null) {
-      console.log('Userdata fectched by login form me query: ', userData);
-      setFavGenre(userData.me.favoriteGenre);
-    }
-  }, [userData]);
   const handleLogin = async (e) => {
     e.preventDefault();
     await login({ variables: { username, password } });
     if (result.data) {
       setToken(result.data.login.value);
-      setFavGenre();
       setVisible(false);
     }
   };

@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { useQuery } from '@apollo/client';
+import { ME } from './queries';
 import Authors from './components/Authors';
 import Books from './components/Books';
 import NewBook from './components/NewBook';
@@ -17,13 +19,23 @@ const App = ({ client }) => {
     if (storedToken) {
       setToken(storedToken);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const { data } = useQuery(ME);
+  useEffect(() => {
+    if (data?.me) {
+      console.log('Userdata inside LoginForm useEffect() : ', data);
+      setFavGenre(data.me.favoriteGenre);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, token]);
+
   const logout = () => {
-    setToken(null);
-    localStorage.clear();
     client.resetStore();
+    localStorage.clear();
+    setToken(null);
+    setFavGenre(null);
+    setPage('authors');
   };
 
   const notify = (msg) => {
@@ -45,7 +57,9 @@ const App = ({ client }) => {
       <Authors show={page === 'authors'} token={token} />
       <Books show={page === 'books'} />
       <NewBook show={page === 'add'} />
-      <Recommended show={page === 'recommended'} favGenre={favGenre} />
+      {token && (
+        <Recommended show={page === 'recommended'} favGenre={favGenre} />
+      )}
     </div>
   );
 };
