@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useQuery } from '@apollo/client';
+import { useQuery, useApolloClient } from '@apollo/client';
 import { ME } from './queries';
 import Authors from './components/Authors';
 import Books from './components/Books';
@@ -8,7 +8,7 @@ import Recommended from './components/Recommended';
 import Notify from './components/Notify';
 import Nav from './components/Nav';
 
-const App = ({ client }) => {
+const App = () => {
   const [page, setPage] = useState('authors');
   const [token, setToken] = useState(null);
   const [favGenre, setFavGenre] = useState('');
@@ -21,8 +21,13 @@ const App = ({ client }) => {
     }
   }, []);
 
-  const { data } = useQuery(ME);
+  const client = useApolloClient();
+  const { data } = useQuery(ME, {
+    variables: { token },
+  });
+
   useEffect(() => {
+    console.log('useEffect called', { data });
     if (data?.me) {
       console.log('Userdata inside LoginForm useEffect() : ', data);
       setFavGenre(data.me.favoriteGenre);
@@ -57,9 +62,7 @@ const App = ({ client }) => {
       <Authors show={page === 'authors'} token={token} />
       <Books show={page === 'books'} />
       <NewBook show={page === 'add'} />
-      {token && (
-        <Recommended show={page === 'recommended'} favGenre={favGenre} />
-      )}
+      <Recommended show={page === 'recommended'} favGenre={favGenre} />
     </div>
   );
 };

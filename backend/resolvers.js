@@ -16,7 +16,7 @@ export const typeDefs = gql`
     authorCount: Int!
     allBooks(author: String, genre: String): [Book]!
     allAuthors: [Author]!
-    me: User
+    me(token: String): User
   }
 
   type Token {
@@ -93,7 +93,7 @@ export const resolvers = {
       return authors;
     },
     me: async (root, args, { currentUser }) => {
-      console.log({ currentUser });
+      console.log('token:', args.token);
       return currentUser;
     },
   },
