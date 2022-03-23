@@ -77,7 +77,9 @@ export const BOOK_ADDED = gql`
   subscription {
     bookAdded {
       title
-      author
+      author {
+        name
+      }
       published
       genres
     }

@@ -1,6 +1,4 @@
 /* eslint-disable no-unused-vars */
-import { execute, subscribe } from 'graphql';
-import { SubscriptionServer } from 'subscriptions-transport-ws';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
@@ -13,6 +11,8 @@ import typeDefs from './schema.js';
 import process from 'process';
 import express from 'express';
 import http from 'http';
+import { execute, subscribe } from 'graphql';
+import { SubscriptionServer } from 'subscriptions-transport-ws';
 
 dotenv.config();
 const { MONGO_URL, JWT_SECRET } = process.env;
@@ -27,16 +27,14 @@ const start = async () => {
   const httpServer = http.createServer(app);
 
   const schema = makeExecutableSchema({ typeDefs, resolvers });
+
   const subscriptionServer = SubscriptionServer.create(
     {
       schema,
       execute,
       subscribe,
     },
-    {
-      server: httpServer,
-      path: '',
-    }
+    { server: httpServer, path: '/graphql' }
   );
 
   const server = new ApolloServer({

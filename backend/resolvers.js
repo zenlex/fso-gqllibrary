@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { AuthenticationError, gql, UserInputError } from 'apollo-server-core';
+import { AuthenticationError, UserInputError } from 'apollo-server-core';
 import Book from './models/book.js';
 import Author from './models/author.js';
 import User from './models/user.js';
@@ -71,15 +71,16 @@ const resolvers = {
       }
       try {
         await Book.create(newBook);
-        const book = await Book.findOne({ title: newBook.title }).populate(
+        newBook = await Book.findOne({ title: newBook.title }).populate(
           'author'
         );
-        countBooks(book.author);
-        pubsub.publish('BOOK_ADDED', { bookAdded: book });
-        return book;
+        countBooks(newBook.author);
       } catch (err) {
         throw new UserInputError(err.message);
       }
+      pubsub.publish('BOOK_ADDED', { bookAdded: newBook });
+      console.log('pubSub called with bookAdded: ', newBook);
+      return newBook;
     },
     editAuthor: async (root, args, { currentUser }) => {
       if (!currentUser) {
