@@ -7,9 +7,11 @@
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
     "graphql": "^16.3.0",
+    "graphql-subscriptions": "^2.0.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.2.7",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "subscriptions-transport-ws": "^0.11.0"
   },
   "name": "fso-gqllibrary",
   "version": "1.0.0",

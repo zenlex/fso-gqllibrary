@@ -29,6 +29,7 @@ const NewBook = ({ show, setPage }) => {
       },
       refetchQueries: [ALL_AUTHORS, ALL_BOOKS],
     });
+
     setTitle('');
     setPublished('');
     setAuthor('');
