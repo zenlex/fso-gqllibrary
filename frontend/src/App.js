@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useApolloClient, useSubscription } from '@apollo/client';
-import { BOOK_ADDED, ME } from './queries';
+import { BOOK_ADDED, ME, ALL_BOOKS } from './queries';
 import Authors from './components/Authors';
 import Books from './components/Books';
 import NewBook from './components/NewBook';
@@ -36,13 +36,11 @@ const App = () => {
 
   useSubscription(BOOK_ADDED, {
     onSubscriptionData: ({ subscriptionData }) => {
-      console.log('onSubscriptionData called');
       const addedBook = subscriptionData.data.bookAdded;
       notify(`New Book Added: ${addedBook.title} by ${addedBook.author.name}`);
-      //! this part is currently broken due to a bug in apollo client - I had to rollback to a previous version to get the subscription hook to work correctly, but cache.updateQuery doesn't exist in 3.2....
-      // client.cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
-      //   return { allBooks: allBooks.concat(addedBook) };
-      // });
+      client.cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
+        return { allBooks: [...allBooks, addedBook] };
+      });
     },
   });
 
